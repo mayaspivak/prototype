@@ -19,9 +19,8 @@ def ingest_data():
         return ('', 400)
 
     if not isinstance(envelope, dict) or 'message' not in envelope:
-        msg = 'invalid Pub/Sub message format'
-        print(f'error: {msg}')
-        return (f'Bad Request: {msg}', 400)
+        logging.error('Invalid Pub/Sub message format')
+        return ('', 400)
 
     data = envelope['message']
     logging.info(f"message: {data}")
@@ -29,18 +28,19 @@ def ingest_data():
     try:
         if 'data' not in data:
             logging.warning("PubSub message missing 'data' field")
-            return (f'Bad Request: {data}', 400)
+            return ('', 400)
         data = base64.b64decode(data['data']).decode('utf-8')
         event_dict = json.loads(data)
     except json.JSONDecodeError as err:
         logging.error("Could not load json object: %s", err)
+        return ('', 400)
 
     if 'id' not in event_dict:
         logging.error(f"PubSub data missing 'id' field: {event_dict}")
-        return (f'Bad Request: {event_dict}', 400)
+        return ('', 400)
     if 'url' not in event_dict or 'gcs_bucket' not in event_dict or 'filename' not in event_dict:
         logging.error("Pubsub data must contain fields 'url', 'gcs_bucket', and 'filename'")
-        return (f'Bad Request: {event_dict}', 400)
+        return ('', 400)
     
     data_id = event_dict['id']
     logging.info(f'Ingesting {data_id} data')
