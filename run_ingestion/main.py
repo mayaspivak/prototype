@@ -13,6 +13,8 @@ _CDC_COVID_DEATHS = 'CDC_COVID_DEATHS'
 
 @app.route('/', methods=['POST'])
 def ingest_data():
+  """Main function for data ingestion. Receives Pub/Sub trigger and triages to the
+     appropriate data ingestion workflow and returns 400 for a bad request or 204 for success."""
     envelope = request.get_json()
     if not envelope:
         logging.error('No Pub/Sub message received.')
@@ -47,7 +49,7 @@ def ingest_data():
     if data_id == _HOUSEHOLD_INCOME:
         upload_household_income(event_dict['url'], event_dict['gcs_bucket'], event_dict['filename'])
     else:
-        url_file_to_gcs(event_dict['url'], '', event_dict['gcs_bucket'], event_dict['filename'])
+        url_file_to_gcs(event_dict['url'], {}, event_dict['gcs_bucket'], event_dict['filename'])
 
     return ('', 204)
 
