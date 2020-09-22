@@ -49,3 +49,8 @@ variable "household_income_scheduler_name" {
   description   = "Name of the Cloud Scheduler job for downloading household income data"
   type          = string
 }
+
+variable "run_ingestion_image_path" {
+  description = "Path to container image for the Cloud Run ingestion service"
+  type        = string
+}
