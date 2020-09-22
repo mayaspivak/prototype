@@ -215,19 +215,20 @@ resource "google_pubsub_subscription" "ingestion_subscription" {
   }
 }
 
+# Give the ingestion service account the invoker role so that it can call the ingestion service.
 resource "google_cloud_run_service_iam_binding" "ingestion_service_binding" {
   location = var.compute_region
   service = google_cloud_run_service.ingestion_service.name
   role = "roles/invoker"
   members = [
-    "serviceAccount:" + google_service_account.ingestion_identity.email
+    format("serviceAccount:%s", google_service_account.ingestion_identity.email),
   ]
 }
 
 # Cloud Run service for uploading data to gcs.
 resource "google_cloud_run_service" "ingestion_service" {
   name     = var.run_ingestion_service_name
-  location = "us-central1"
+  location = var.compute_region
 
   template {
     spec {
